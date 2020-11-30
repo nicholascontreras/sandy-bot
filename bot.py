@@ -1,11 +1,13 @@
-import os, re, time
+import os, re, time, random
 import discord
+from discord.ext import tasks
 
 client = discord.Client()
 
 @client.event
 async def on_ready():
-    print('We have logged in as: ' + str(client.user))   
+    print('We have logged in as: ' + str(client.user))
+    talk_in_voice_chats.start()   
 
 @client.event
 async def on_message(message):
@@ -13,19 +15,26 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    # Respond with Sandy if someone says yeet
+    # Respond with Sandy image if someone says yeet
     if re.compile('\\b(yeet)\\b', re.IGNORECASE).match(message.content):
         img_file = discord.File(fp=open('imgs/sandy.png', 'rb'), filename='yeet.png')
+        await message.channel.send(file=img_file)
 
-        topmost_voice_channel = message.guild.voice_channels[0]
-        voice_client = await topmost_voice_channel.connect()
-        voice_client.play(discord.FFmpegPCMAudio(source="audio/test.wav"))
+@tasks.loop(seconds=5.0)
+async def talk_in_voice_chats():
+    for guild in client.guilds:
 
-        while voice_client.is_playing():
-            time.sleep(.1)
+        topmost_voice_channel = guild.voice_channels[0]
+        try:
+            voice_client = await topmost_voice_channel.connect()
+        except discord.ClientException:
+            voice_client = guild.voice_client
 
-        await voice_client.disconnect()
+        # 10% change to start playing (if we're not already)
+        if random.random() < 0.1 and (not voice_client.is_playing()):
+            audio_files = os.listdir('audio')
+            audio_source = discord.FFmpegPCMAudio(source='audio/' + random.choice(audio_files), executable='ffmpeg.exe')
+            voice_client.play(audio_source)
 
-        # await message.channel.send(file=img_file)
 
 client.run(os.getenv('DISCORD_TOKEN'))
