@@ -33,7 +33,13 @@ async def talk_in_voice_chats():
         # 10% change to start playing (if we're not already)
         if random.random() < 0.1 and (not voice_client.is_playing()):
             audio_files = os.listdir('audio')
-            audio_source = discord.FFmpegPCMAudio(source='audio/' + random.choice(audio_files), executable=os.getenv('FFMPEG_LOCATION', 'ffmpeg.exe'))
+            selected_audio_source = 'audio/' + random.choice(audio_files)
+
+            if len(voice_client.channel.members) <= 1:
+                while selected_audio_source == 'audio/communism.ogg':
+                    selected_audio_source = 'audio/' + random.choice(audio_files)
+
+            audio_source = discord.FFmpegPCMAudio(source=selected_audio_source, executable=os.getenv('FFMPEG_LOCATION', 'ffmpeg.exe'))
             voice_client.play(audio_source)
 
 
