@@ -72,7 +72,7 @@ async def check_for_events_ending():
             cur_event_end_day = cur_event_end_day.replace('st', '').replace('nd', '').replace('rd', '').replace('th', '')
             cur_event_end_day = int(cur_event_end_day)
 
-            server_datetime = datetime.datetime.now() - datetime.timedelta(hours=-7)
+            server_datetime = datetime.datetime.now() - datetime.timedelta(hours=7)
 
             if (calendar.month_name[server_datetime.month] == cur_event_end_month) and (server_datetime.day == cur_event_end_day):
                 if server_datetime.hour == 12:
