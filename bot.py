@@ -22,7 +22,7 @@ async def on_message(message):
         img_file = discord.File(fp=open('imgs/sandy.png', 'rb'), filename='yeet.png')
         await message.channel.send(file=img_file)
 
-@tasks.loop(seconds=5.0)
+@tasks.loop(seconds=10.0)
 async def talk_in_voice_chats():
     for guild in client.guilds:
 
@@ -32,8 +32,8 @@ async def talk_in_voice_chats():
         except discord.ClientException:
             voice_client = guild.voice_client
 
-        # 10% change to start playing (if we're not already)
-        if random.random() < 0.1 and (not voice_client.is_playing()):
+        # 25% change to start playing (if we're not already)
+        if random.random() < 0.25 and (not voice_client.is_playing()):
             audio_files = os.listdir('audio')
             selected_audio_source = 'audio/' + random.choice(audio_files)
 
