@@ -3,11 +3,17 @@ import datetime, calendar
 import discord
 from discord.ext import tasks
 
+voiceline_folders = {}
+
 client = discord.Client()
 
 @client.event
 async def on_ready():
     print('We have logged in as: ' + str(client.user))
+
+    for guild in client.guilds:
+        print(set_ship('San Diego', guild))
+
     talk_in_voice_chats.start()
     check_for_events_ending.start()   
 
@@ -17,14 +23,67 @@ async def on_message(message):
     if message.author == client.user:
         return
 
+    if message.content.startswith('transform:'):
+        new_ship_name = message.content[10:].strip()
+
+        if message.guild.get_member(client.user.id).nick == new_ship_name:
+            await message.channel.send(content='I already am ' + new_ship_name + '!')
+        else:
+            await message.channel.send(content='Becoming ' + new_ship_name + ', please wait...')
+            result = set_ship(new_ship_name, message.guild)
+            await message.channel.send(content=result)
+
     # Respond with Sandy image if someone says yeet
     if re.compile('\\b(yeet)\\b', re.IGNORECASE).match(message.content):
         img_file = discord.File(fp=open('imgs/sandy.png', 'rb'), filename='yeet.png')
         await message.channel.send(file=img_file)
 
+def set_ship(ship_name: str, target_guild):
+
+    if not ship_name in voiceline_folders:
+        load_voicelines_for_ship(ship_name)
+
+    target_guild.get_member(client.user.id).edit(nick=ship_name)
+    return 'Successfully became ' + ship_name + '!'
+
+def load_voicelines_for_ship(ship_name: str):
+
+    folder_name = str(time.time())
+    os.makedirs('voicelines/' + folder_name)
+    voiceline_folders[ship_name] = folder_name 
+
+    ship_name_target_string = 'title="' + ship_name + '">' + ship_name + '</a>'
+    list_of_ships = requests.get('https://azurlane.koumakan.jp/List_of_Ships').text
+
+    if ship_name_target_string in list_of_ships:
+        list_of_ships = list_of_ships[:list_of_ships.index(ship_name_target_string)]
+        new_ship_url = list_of_ships[list_of_ships.rindex('<a href="') + 9:]
+        new_ship_url = new_ship_url[:new_ship_url.index('"')]
+        new_ship_url = 'https://azurlane.koumakan.jp' + new_ship_url + '/Quotes'
+
+        list_of_voicelines = requests.get(new_ship_url).text
+        list_of_voicelines = list_of_voicelines[list_of_voicelines.index('<table') : list_of_voicelines.index('</table')]
+
+        voiceline_target_string = '.ogg" title="Play" class="sm2_button">Play</a>'
+
+        file_index = 0
+        while voiceline_target_string in list_of_voicelines:
+            cur_voiceline_url = list_of_voicelines[:list_of_voicelines.index(voiceline_target_string) + 4]
+            cur_voiceline_url = cur_voiceline_url[cur_voiceline_url.rindex('<a href="') + 9:]
+
+            cur_voiceline_file = requests.get(cur_voiceline_url, stream=True)
+            with open('voicelines/' + folder_name + '/voiceline-' + str(file_index) + '.ogg', 'wb') as handle:
+                for block in cur_voiceline_file.iter_content(1024):
+                    handle.write(block)
+
+            list_of_voicelines = list_of_voicelines[list_of_voicelines.index(voiceline_target_string) + 1:]
+            file_index += 1
+
 @tasks.loop(seconds=20.0)
 async def talk_in_voice_chats():
     for guild in client.guilds:
+
+        cur_voiceline_folder = 'voicelines/' + voiceline_folders[guild.get_member(client.user.id)]
 
         topmost_voice_channel = guild.voice_channels[0]
         try:
@@ -34,12 +93,8 @@ async def talk_in_voice_chats():
 
         # 25% change to start playing (if we're not already)
         if random.random() < 0.25 and (not voice_client.is_playing()):
-            audio_files = os.listdir('audio')
-            selected_audio_source = 'audio/' + random.choice(audio_files)
-
-            if len(voice_client.channel.members) <= 1:
-                while selected_audio_source == 'audio/communism.ogg':
-                    selected_audio_source = 'audio/' + random.choice(audio_files)
+            audio_files = os.listdir(cur_voiceline_folder)
+            selected_audio_source = random.choice(audio_files)
 
             audio_source = discord.FFmpegPCMAudio(source=selected_audio_source, executable=os.getenv('FFMPEG_LOCATION', 'ffmpeg.exe'))
             voice_client.play(audio_source)
