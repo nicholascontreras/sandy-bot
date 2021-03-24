@@ -83,6 +83,15 @@ async def load_voicelines_for_ship(ship_name: str):
 async def talk_in_voice_chats():
     for guild in client.guilds:
 
+        print(client)
+        print(client.user)
+        print(client.user.id)
+        print('---')
+        print(guild)
+        print(guild.get_member(client.user.id))
+        print(guild.get_member(client.user.id).nick)
+        print(voiceline_folders[guild.get_member(client.user.id).nick])
+
         cur_voiceline_folder = 'voicelines/' + voiceline_folders[guild.get_member(client.user.id).nick]
 
         topmost_voice_channel = guild.voice_channels[0]
