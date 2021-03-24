@@ -95,9 +95,10 @@ async def talk_in_voice_chats():
             voice_client = guild.voice_client
 
         # 25% change to start playing (if we're not already)
-        if random.random() < 0.25 and (not voice_client.is_playing()):
+        if random.random() < 25 and (not voice_client.is_playing()):
             audio_files = os.listdir(cur_voiceline_folder)
             selected_audio_source = cur_voiceline_folder + '/' + random.choice(audio_files)
+            print(selected_audio_source)
 
             audio_source = discord.FFmpegPCMAudio(source=selected_audio_source, executable=os.getenv('FFMPEG_LOCATION', 'ffmpeg.exe'))
             voice_client.play(audio_source)
