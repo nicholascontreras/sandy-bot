@@ -26,7 +26,7 @@ async def on_message(message):
     if message.content.startswith('transform:'):
         new_ship_name = message.content[10:].strip()
 
-        if message.guild.get_member(client.user.id).nick == new_ship_name:
+        if message.guild.get_member(client.user.id).display_name == new_ship_name:
             await message.channel.send(content='I already am ' + new_ship_name + '!')
         else:
             await message.channel.send(content='Becoming ' + new_ship_name + ', please wait...')
@@ -89,10 +89,10 @@ async def talk_in_voice_chats():
         print('---')
         print(guild)
         print(guild.get_member(client.user.id))
-        print(guild.get_member(client.user.id).nick)
-        print(voiceline_folders[guild.get_member(client.user.id).nick])
+        print(guild.get_member(client.user.id).display_name)
+        print(voiceline_folders[guild.get_member(client.user.id).display_name])
 
-        cur_voiceline_folder = 'voicelines/' + voiceline_folders[guild.get_member(client.user.id).nick]
+        cur_voiceline_folder = 'voicelines/' + voiceline_folders[guild.get_member(client.user.id).display_name]
 
         topmost_voice_channel = guild.voice_channels[0]
         try:
