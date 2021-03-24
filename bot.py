@@ -30,7 +30,7 @@ async def on_message(message):
             await message.channel.send(content='I already am ' + new_ship_name + '!')
         else:
             await message.channel.send(content='Becoming ' + new_ship_name + ', please wait...')
-            result = set_ship(new_ship_name, message.guild)
+            result = await set_ship(new_ship_name, message.guild)
             await message.channel.send(content=result)
 
     # Respond with Sandy image if someone says yeet
@@ -83,15 +83,6 @@ async def load_voicelines_for_ship(ship_name: str):
 async def talk_in_voice_chats():
     for guild in client.guilds:
 
-        print(client)
-        print(client.user)
-        print(client.user.id)
-        print('---')
-        print(guild)
-        print(guild.get_member(client.user.id))
-        print(guild.get_member(client.user.id).display_name)
-        print(voiceline_folders[guild.get_member(client.user.id).display_name])
-
         cur_voiceline_folder = 'voicelines/' + voiceline_folders[guild.get_member(client.user.id).display_name]
 
         topmost_voice_channel = guild.voice_channels[0]
@@ -103,7 +94,7 @@ async def talk_in_voice_chats():
         # 25% change to start playing (if we're not already)
         if random.random() < 0.25 and (not voice_client.is_playing()):
             audio_files = os.listdir(cur_voiceline_folder)
-            selected_audio_source = random.choice(audio_files)
+            selected_audio_source = cur_voiceline_folder + '/' + random.choice(audio_files)
 
             audio_source = discord.FFmpegPCMAudio(source=selected_audio_source, executable=os.getenv('FFMPEG_LOCATION', 'ffmpeg.exe'))
             voice_client.play(audio_source)
