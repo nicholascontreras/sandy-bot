@@ -48,6 +48,8 @@ async def set_ship(ship_name: str, target_guild):
 
 async def load_voicelines_for_ship(ship_name: str):
 
+    print('Loading voicelines for ' + ship_name)
+
     folder_name = str(time.time())
     os.makedirs('voicelines/' + folder_name)
     voiceline_folders[ship_name] = folder_name 
@@ -76,6 +78,7 @@ async def load_voicelines_for_ship(ship_name: str):
                 for block in cur_voiceline_file.iter_content(1024):
                     handle.write(block)
 
+            print('Saved voiceline number ' + str(file_index))
             list_of_voicelines = list_of_voicelines[list_of_voicelines.index(voiceline_target_string) + 1:]
             file_index += 1
 
