@@ -12,7 +12,7 @@ async def on_ready():
     print('We have logged in as: ' + str(client.user))
 
     for guild in client.guilds:
-        print(set_ship('San Diego', guild))
+        print(await set_ship('San Diego', guild))
 
     talk_in_voice_chats.start()
     check_for_events_ending.start()   
@@ -38,15 +38,15 @@ async def on_message(message):
         img_file = discord.File(fp=open('imgs/sandy.png', 'rb'), filename='yeet.png')
         await message.channel.send(file=img_file)
 
-def set_ship(ship_name: str, target_guild):
+async def set_ship(ship_name: str, target_guild):
 
     if not ship_name in voiceline_folders:
-        load_voicelines_for_ship(ship_name)
+        await load_voicelines_for_ship(ship_name)
 
-    target_guild.get_member(client.user.id).edit(nick=ship_name)
+    await target_guild.get_member(client.user.id).edit(nick=ship_name)
     return 'Successfully became ' + ship_name + '!'
 
-def load_voicelines_for_ship(ship_name: str):
+async def load_voicelines_for_ship(ship_name: str):
 
     folder_name = str(time.time())
     os.makedirs('voicelines/' + folder_name)
