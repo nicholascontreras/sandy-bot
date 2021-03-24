@@ -22,7 +22,7 @@ async def on_message(message):
         img_file = discord.File(fp=open('imgs/sandy.png', 'rb'), filename='yeet.png')
         await message.channel.send(file=img_file)
 
-@tasks.loop(seconds=10.0)
+@tasks.loop(seconds=20.0)
 async def talk_in_voice_chats():
     for guild in client.guilds:
 
