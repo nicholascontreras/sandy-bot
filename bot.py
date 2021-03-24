@@ -41,7 +41,9 @@ async def on_message(message):
 async def set_ship(ship_name: str, target_guild):
 
     if not ship_name in voiceline_folders:
-        await load_voicelines_for_ship(ship_name)
+        error = await load_voicelines_for_ship(ship_name)
+        if error:
+            return 'Unable to become ' + ship_name + ': ' + error
 
     await target_guild.get_member(client.user.id).edit(nick=ship_name)
     return 'Successfully became ' + ship_name + '!'
@@ -50,9 +52,9 @@ async def load_voicelines_for_ship(ship_name: str):
 
     print('Loading voicelines for ' + ship_name)
 
+    has_any_voicelines = False
     folder_name = str(time.time())
     os.makedirs('voicelines/' + folder_name)
-    voiceline_folders[ship_name] = folder_name 
 
     ship_name_target_string = 'title="' + ship_name + '">' + ship_name + '</a>'
     list_of_ships = requests.get('https://azurlane.koumakan.jp/List_of_Ships').text
@@ -81,6 +83,15 @@ async def load_voicelines_for_ship(ship_name: str):
             print('Saved voiceline number ' + str(file_index))
             list_of_voicelines = list_of_voicelines[list_of_voicelines.index(voiceline_target_string) + 1:]
             file_index += 1
+            has_any_voicelines = True
+    else:
+        return 'Ship of name ' + ship_name + ' not found on wiki.'
+    
+    if has_any_voicelines:
+        voiceline_folders[ship_name] = folder_name
+        return None
+    else:
+        return 'No voicelines found on wiki.'
 
 @tasks.loop(seconds=20.0)
 async def talk_in_voice_chats():
