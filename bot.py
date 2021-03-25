@@ -111,7 +111,7 @@ async def load_voicelines_for_ship(ship_name: str):
 async def set_profile_picture(ship_name: str):
     print('Loading picture for ' + ship_name)
 
-    ship_name_target_string = 'title="' + ship_name + '">' + ship_name + '</a>'
+    ship_name_target_string = '">' + ship_name + '</a>'
     list_of_ships = requests.get('https://azurlane.koumakan.jp/List_of_Ships').text
     list_of_ships = list_of_ships[:list_of_ships.index(ship_name_target_string)]
     new_ship_url = list_of_ships[list_of_ships.rindex('<a href="') + 9:]
