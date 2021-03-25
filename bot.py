@@ -42,12 +42,9 @@ async def on_message(message):
         await message.channel.send(file=img_file)
 
 async def set_ship(ship_name: str, target_guild):
-    talk_in_voice_chats.cancel()
-
     if not ship_name in voiceline_folders:
         error = await load_voicelines_for_ship(ship_name)
         if error:
-            talk_in_voice_chats.start()
             return 'Unable to become ' + ship_name + ': ' + error
 
     return_value = ''
@@ -58,7 +55,6 @@ async def set_ship(ship_name: str, target_guild):
     await target_guild.get_member(client.user.id).edit(nick=ship_name)
 
     await introduce_in_voice_chat(target_guild)
-    talk_in_voice_chats.start()
 
     return_value += 'Successfully became ' + ship_name + '!'
     return return_value
@@ -160,6 +156,9 @@ async def introduce_in_voice_chat(guild):
         voice_client = await topmost_voice_channel.connect()
     except discord.ClientException:
         voice_client = guild.voice_client
+
+    while voice_client.is_playing():
+        time.sleep(1)
 
     selected_audio_source = cur_voiceline_folder + '/voiceline-0.ogg'
     audio_source = discord.FFmpegPCMAudio(source=selected_audio_source, executable=os.getenv('FFMPEG_LOCATION', 'ffmpeg.exe'))
