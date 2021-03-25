@@ -44,8 +44,15 @@ async def set_ship(ship_name: str, target_guild):
         if error:
             return 'Unable to become ' + ship_name + ': ' + error
 
+    return_value = ''
+    warning = await set_profile_picture(ship_name)
+    if warning:
+        return_value += warning + '\n'
+
     await target_guild.get_member(client.user.id).edit(nick=ship_name)
-    return 'Successfully became ' + ship_name + '!'
+
+    return_value += 'Successfully became ' + ship_name + '!'
+    return return_value
 
 async def load_voicelines_for_ship(ship_name: str):
     print('Loading voicelines for ' + ship_name)
@@ -73,10 +80,9 @@ async def load_voicelines_for_ship(ship_name: str):
             cur_voiceline_url = list_of_voicelines[:list_of_voicelines.index(voiceline_target_string) + 4]
             cur_voiceline_url = cur_voiceline_url[cur_voiceline_url.rindex('<a href="') + 9:]
 
-            cur_voiceline_file = requests.get(cur_voiceline_url, stream=True)
-            with open('voicelines/' + folder_name + '/voiceline-' + str(file_index) + '.ogg', 'wb') as handle:
-                for block in cur_voiceline_file.iter_content(1024):
-                    handle.write(block)
+            cur_voiceline_bytes = requests.get(cur_voiceline_url).content
+            with open('voicelines/' + folder_name + '/voiceline-' + str(file_index) + '.ogg', 'wb') as cur_voiceline_file:
+                cur_voiceline_file.write(cur_voiceline_bytes)
 
             list_of_voicelines = list_of_voicelines[list_of_voicelines.index(voiceline_target_string) + 1:]
             file_index += 1
@@ -89,6 +95,27 @@ async def load_voicelines_for_ship(ship_name: str):
         return None
     else:
         return 'No voicelines found on the wiki.'
+
+async def set_profile_picture(ship_name: str):
+    print('Loading picture for ' + ship_name)
+
+    ship_name_target_string = 'title="' + ship_name + '">' + ship_name + '</a>'
+    list_of_ships = requests.get('https://azurlane.koumakan.jp/List_of_Ships').text
+    list_of_ships = list_of_ships[:list_of_ships.index(ship_name_target_string)]
+    new_ship_url = list_of_ships[list_of_ships.rindex('<a href="') + 9:]
+    new_ship_url = new_ship_url[:new_ship_url.index('"')]
+    new_ship_url = 'https://azurlane.koumakan.jp' + new_ship_url
+
+    new_ship_image_url = requests.get(new_ship_url).text
+    new_ship_image_url = new_ship_image_url[new_ship_image_url.index('<img'):]
+    new_ship_image_url = new_ship_image_url[new_ship_image_url.index('src="') + 5:]
+    new_ship_image_url = new_ship_image_url[:new_ship_image_url.index('"')]
+    new_ship_image_url = 'https://azurlane.koumakan.jp' + new_ship_image_url
+
+    new_ship_image_bytes = requests.get(new_ship_image_url).content
+    await client.user.edit(avatar=new_ship_image_bytes)
+
+    return None
 
 @tasks.loop(seconds=20.0)
 async def talk_in_voice_chats():
