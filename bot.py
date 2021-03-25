@@ -14,7 +14,7 @@ async def on_ready():
     for guild in client.guilds:
         cur_ship_name = guild.get_member(client.user.id).display_name
         if not cur_ship_name in voiceline_folders:
-            print('Errors: ' + (await load_voicelines_for_ship(cur_ship_name)))
+            print('Errors: ' + str(await load_voicelines_for_ship(cur_ship_name)))
 
     talk_in_voice_chats.start()
     check_for_events_ending.start()   
@@ -119,7 +119,7 @@ async def set_profile_picture(ship_name: str):
         await client.user.edit(avatar=new_ship_image_bytes)
     except discord.HTTPException:
         return 'Unable to change profile picture due to Discord rate limits.'
-        
+
     return None
 
 @tasks.loop(seconds=20.0)
