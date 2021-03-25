@@ -12,7 +12,9 @@ async def on_ready():
     print('We have logged in as: ' + str(client.user))
 
     for guild in client.guilds:
-        print(await set_ship('San Diego', guild))
+        cur_ship_name = guild.get_member(client.user.id).display_name
+        if not cur_ship_name in voiceline_folders:
+            print(await load_voicelines_for_ship(cur_ship_name))
 
     talk_in_voice_chats.start()
     check_for_events_ending.start()   
