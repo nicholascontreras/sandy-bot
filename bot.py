@@ -39,7 +39,6 @@ async def on_message(message):
         await message.channel.send(file=img_file)
 
 async def set_ship(ship_name: str, target_guild):
-
     if not ship_name in voiceline_folders:
         error = await load_voicelines_for_ship(ship_name)
         if error:
@@ -49,7 +48,6 @@ async def set_ship(ship_name: str, target_guild):
     return 'Successfully became ' + ship_name + '!'
 
 async def load_voicelines_for_ship(ship_name: str):
-
     print('Loading voicelines for ' + ship_name)
 
     has_any_voicelines = False
@@ -80,18 +78,17 @@ async def load_voicelines_for_ship(ship_name: str):
                 for block in cur_voiceline_file.iter_content(1024):
                     handle.write(block)
 
-            print('Saved voiceline number ' + str(file_index))
             list_of_voicelines = list_of_voicelines[list_of_voicelines.index(voiceline_target_string) + 1:]
             file_index += 1
             has_any_voicelines = True
     else:
-        return 'Ship of name ' + ship_name + ' not found on wiki.'
+        return 'Name not found on the wiki.'
     
     if has_any_voicelines:
         voiceline_folders[ship_name] = folder_name
         return None
     else:
-        return 'No voicelines found on wiki.'
+        return 'No voicelines found on the wiki.'
 
 @tasks.loop(seconds=20.0)
 async def talk_in_voice_chats():
@@ -106,10 +103,9 @@ async def talk_in_voice_chats():
             voice_client = guild.voice_client
 
         # 25% change to start playing (if we're not already)
-        if random.random() < 25 and (not voice_client.is_playing()):
+        if random.random() < 0.25 and (not voice_client.is_playing()):
             audio_files = os.listdir(cur_voiceline_folder)
             selected_audio_source = cur_voiceline_folder + '/' + random.choice(audio_files)
-            print(selected_audio_source)
 
             audio_source = discord.FFmpegPCMAudio(source=selected_audio_source, executable=os.getenv('FFMPEG_LOCATION', 'ffmpeg.exe'))
             voice_client.play(audio_source)
