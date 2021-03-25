@@ -115,9 +115,11 @@ async def set_profile_picture(ship_name: str):
     print('loading bytes')
     new_ship_image_bytes = requests.get(new_ship_image_url).content
     print('got bytes')
-    await client.user.edit(avatar=new_ship_image_bytes)
+    try:
+        await client.user.edit(avatar=new_ship_image_bytes)
+    except discord.HTTPException:
+        return 'Unable to change profile picture due to Discord rate limits.'
     print('done')
-
     return None
 
 @tasks.loop(seconds=20.0)
