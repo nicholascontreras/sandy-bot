@@ -112,8 +112,11 @@ async def set_profile_picture(ship_name: str):
     new_ship_image_url = new_ship_image_url[:new_ship_image_url.index('"')]
     new_ship_image_url = 'https://azurlane.koumakan.jp' + new_ship_image_url
 
+    print('loading bytes')
     new_ship_image_bytes = requests.get(new_ship_image_url).content
+    print('got bytes')
     await client.user.edit(avatar=new_ship_image_bytes)
+    print('done')
 
     return None
 
