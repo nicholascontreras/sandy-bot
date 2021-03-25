@@ -1,5 +1,6 @@
 import os, re, time, random, requests
 import datetime, calendar
+import asyncio
 import discord
 from discord.ext import tasks
 
@@ -34,7 +35,6 @@ async def on_message(message):
             await message.channel.send(content='Becoming ' + new_ship_name + ', please wait...')
             result = await set_ship(new_ship_name, message.guild)
             await message.channel.send(content=result)
-            await introduce_in_voice_chat(message.guild)
 
     # Respond with Sandy image if someone says yeet
     if re.compile('\\b(yeet)\\b', re.IGNORECASE).match(message.content):
@@ -42,9 +42,12 @@ async def on_message(message):
         await message.channel.send(file=img_file)
 
 async def set_ship(ship_name: str, target_guild):
+    talk_in_voice_chats.cancel()
+
     if not ship_name in voiceline_folders:
         error = await load_voicelines_for_ship(ship_name)
         if error:
+            talk_in_voice_chats.start()
             return 'Unable to become ' + ship_name + ': ' + error
 
     return_value = ''
@@ -53,6 +56,9 @@ async def set_ship(ship_name: str, target_guild):
         return_value += warning + '\n'
 
     await target_guild.get_member(client.user.id).edit(nick=ship_name)
+
+    await introduce_in_voice_chat(target_guild)
+    talk_in_voice_chats.start()
 
     return_value += 'Successfully became ' + ship_name + '!'
     return return_value
@@ -64,7 +70,7 @@ async def load_voicelines_for_ship(ship_name: str):
     folder_name = str(time.time())
     os.makedirs('voicelines/' + folder_name)
 
-    ship_name_target_string = 'title="' + ship_name + '">' + ship_name + '</a>'
+    ship_name_target_string = '">' + ship_name + '</a>'
     list_of_ships = requests.get('https://azurlane.koumakan.jp/List_of_Ships').text
 
     if ship_name_target_string in list_of_ships:
@@ -74,22 +80,25 @@ async def load_voicelines_for_ship(ship_name: str):
         new_ship_url = 'https://azurlane.koumakan.jp' + new_ship_url + '/Quotes'
 
         list_of_voicelines = requests.get(new_ship_url).text
-        list_of_voicelines = list_of_voicelines[list_of_voicelines.index('<table') : list_of_voicelines.index('</table')]
+        if '<table' in list_of_voicelines:
+            list_of_voicelines = list_of_voicelines[list_of_voicelines.index('<table') : list_of_voicelines.index('</table')]
 
-        voiceline_target_string = '.ogg" title="Play" class="sm2_button">Play</a>'
+            voiceline_target_string = '.ogg" title="Play" class="sm2_button">Play</a>'
 
-        file_index = 0
-        while voiceline_target_string in list_of_voicelines:
-            cur_voiceline_url = list_of_voicelines[:list_of_voicelines.index(voiceline_target_string) + 4]
-            cur_voiceline_url = cur_voiceline_url[cur_voiceline_url.rindex('<a href="') + 9:]
+            file_index = 0
+            while voiceline_target_string in list_of_voicelines:
+                cur_voiceline_url = list_of_voicelines[:list_of_voicelines.index(voiceline_target_string) + 4]
+                cur_voiceline_url = cur_voiceline_url[cur_voiceline_url.rindex('<a href="') + 9:]
 
-            cur_voiceline_bytes = requests.get(cur_voiceline_url).content
-            with open('voicelines/' + folder_name + '/voiceline-' + str(file_index) + '.ogg', 'wb') as cur_voiceline_file:
-                cur_voiceline_file.write(cur_voiceline_bytes)
+                cur_voiceline_bytes = requests.get(cur_voiceline_url).content
+                with open('voicelines/' + folder_name + '/voiceline-' + str(file_index) + '.ogg', 'wb') as cur_voiceline_file:
+                    cur_voiceline_file.write(cur_voiceline_bytes)
 
-            list_of_voicelines = list_of_voicelines[list_of_voicelines.index(voiceline_target_string) + 1:]
-            file_index += 1
-            has_any_voicelines = True
+                list_of_voicelines = list_of_voicelines[list_of_voicelines.index(voiceline_target_string) + 1:]
+                file_index += 1
+                has_any_voicelines = True
+        else:
+            return 'Nice try.'
     else:
         return 'Name not found on the wiki.'
     
@@ -117,8 +126,8 @@ async def set_profile_picture(ship_name: str):
 
     new_ship_image_bytes = requests.get(new_ship_image_url).content
     try:
-        await client.user.edit(avatar=new_ship_image_bytes)
-    except discord.HTTPException:
+        await asyncio.wait_for(client.user.edit(avatar=new_ship_image_bytes), timeout=10)
+    except (discord.HTTPException, asyncio.TimeoutError):
         return 'Unable to change profile picture due to Discord rate limits.'
 
     return None
