@@ -34,6 +34,7 @@ async def on_message(message):
             await message.channel.send(content='Becoming ' + new_ship_name + ', please wait...')
             result = await set_ship(new_ship_name, message.guild)
             await message.channel.send(content=result)
+            await introduce_in_voice_chat(message.guild)
 
     # Respond with Sandy image if someone says yeet
     if re.compile('\\b(yeet)\\b', re.IGNORECASE).match(message.content):
@@ -134,13 +135,26 @@ async def talk_in_voice_chats():
         except discord.ClientException:
             voice_client = guild.voice_client
 
-        # 25% change to start playing (if we're not already)
+        # 25% chance to start playing (if we're not already)
         if random.random() < 0.25 and (not voice_client.is_playing()):
             audio_files = os.listdir(cur_voiceline_folder)
             selected_audio_source = cur_voiceline_folder + '/' + random.choice(audio_files)
 
             audio_source = discord.FFmpegPCMAudio(source=selected_audio_source, executable=os.getenv('FFMPEG_LOCATION', 'ffmpeg.exe'))
             voice_client.play(audio_source)
+
+async def introduce_in_voice_chat(guild):
+    cur_voiceline_folder = 'voicelines/' + voiceline_folders[guild.get_member(client.user.id).display_name]
+
+    topmost_voice_channel = guild.voice_channels[0]
+    try:
+        voice_client = await topmost_voice_channel.connect()
+    except discord.ClientException:
+        voice_client = guild.voice_client
+
+    selected_audio_source = cur_voiceline_folder + '/voiceline-0.ogg'
+    audio_source = discord.FFmpegPCMAudio(source=selected_audio_source, executable=os.getenv('FFMPEG_LOCATION', 'ffmpeg.exe'))
+    voice_client.play(audio_source)
 
 @tasks.loop(hours=1)
 async def check_for_events_ending():
