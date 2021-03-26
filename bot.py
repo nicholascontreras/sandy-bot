@@ -73,7 +73,7 @@ async def set_ship(ship_name: str, skin_name: str, target_guild):
     return return_value
 
 async def load_voicelines_for_ship(ship_name: str, skin_name: str):
-    print('Loading voicelines for ' + ship_name, + ': ' + str(skin_name))
+    print('Loading voicelines for ' + ship_name + ': ' + str(skin_name))
 
     has_any_voicelines = False
     folder_name = str(time.time())
