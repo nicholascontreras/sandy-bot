@@ -14,8 +14,14 @@ async def on_ready():
 
     for guild in client.guilds:
         cur_ship_name = guild.get_member(client.user.id).display_name
+        chr_skin_name = None
+        
         if not cur_ship_name in voiceline_folders:
-            print('Errors: ' + str(await load_voicelines_for_ship(cur_ship_name)))
+            if ':' in cur_ship_name:
+                cur_skin_name = cur_ship_name[cur_ship_name.index(':') + 1:].strip()
+                cur_ship_name = cur_ship_name[:cur_ship_name.index(':')].strip()
+
+            print('Errors: ' + str(await load_voicelines_for_ship(cur_ship_name, cur_skin_name)))
 
     talk_in_voice_chats.start()
     check_for_events_ending.start()   
@@ -28,12 +34,19 @@ async def on_message(message):
 
     if message.content.startswith('transform:'):
         new_ship_name = message.content[10:].strip()
+        new_skin_name = None
+        new_display_name = new_ship_name
 
-        if message.guild.get_member(client.user.id).display_name == new_ship_name:
-            await message.channel.send(content='I already am ' + new_ship_name + '!')
+        if ':' in new_ship_name:
+            new_skin_name = new_ship_name[new_ship_name.index(':') + 1:].strip()
+            new_ship_name = new_ship_name[:new_ship_name.index(':')].strip()
+            new_display_name = new_ship_name + ': ' + new_skin_name
+
+        if message.guild.get_member(client.user.id).display_name == new_display_name:
+            await message.channel.send(content='I already am ' + new_display_name + '!')
         else:
-            await message.channel.send(content='Becoming ' + new_ship_name + ', please wait...')
-            result = await set_ship(new_ship_name, message.guild)
+            await message.channel.send(content='Becoming ' + new_display_name + ', please wait...')
+            result = await set_ship(new_ship_name, new_skin_name, message.guild)
             await message.channel.send(content=result)
 
     # Respond with Sandy image if someone says yeet
@@ -41,9 +54,9 @@ async def on_message(message):
         img_file = discord.File(fp=open('imgs/sandy.png', 'rb'), filename='yeet.png')
         await message.channel.send(file=img_file)
 
-async def set_ship(ship_name: str, target_guild):
-    if not ship_name in voiceline_folders:
-        error = await load_voicelines_for_ship(ship_name)
+async def set_ship(ship_name: str, skin_name: str, target_guild):
+    if not (ship_name + ':' + skin_name) in voiceline_folders:
+        error = await load_voicelines_for_ship(ship_name, skin_name)
         if error:
             return 'Unable to become ' + ship_name + ': ' + error
 
@@ -59,7 +72,7 @@ async def set_ship(ship_name: str, target_guild):
     return_value += 'Successfully became ' + ship_name + '!'
     return return_value
 
-async def load_voicelines_for_ship(ship_name: str):
+async def load_voicelines_for_ship(ship_name: str, skin_name: str):
     print('Loading voicelines for ' + ship_name)
 
     has_any_voicelines = False
@@ -77,22 +90,25 @@ async def load_voicelines_for_ship(ship_name: str):
 
         list_of_voicelines = requests.get(new_ship_url).text
         if '<table' in list_of_voicelines:
-            list_of_voicelines = list_of_voicelines[list_of_voicelines.index('<table') : list_of_voicelines.index('</table')]
+            if (not skin_name) or (skin_name + '</span>' in list_of_voicelines):
+                list_of_voicelines = list_of_voicelines[list_of_voicelines.index('<table') : list_of_voicelines.index('</table')]
 
-            voiceline_target_string = '.ogg" title="Play" class="sm2_button">Play</a>'
+                voiceline_target_string = '.ogg" title="Play" class="sm2_button">Play</a>'
 
-            file_index = 0
-            while voiceline_target_string in list_of_voicelines:
-                cur_voiceline_url = list_of_voicelines[:list_of_voicelines.index(voiceline_target_string) + 4]
-                cur_voiceline_url = cur_voiceline_url[cur_voiceline_url.rindex('<a href="') + 9:]
+                file_index = 0
+                while voiceline_target_string in list_of_voicelines:
+                    cur_voiceline_url = list_of_voicelines[:list_of_voicelines.index(voiceline_target_string) + 4]
+                    cur_voiceline_url = cur_voiceline_url[cur_voiceline_url.rindex('<a href="') + 9:]
 
-                cur_voiceline_bytes = requests.get(cur_voiceline_url).content
-                with open('voicelines/' + folder_name + '/voiceline-' + str(file_index) + '.ogg', 'wb') as cur_voiceline_file:
-                    cur_voiceline_file.write(cur_voiceline_bytes)
+                    cur_voiceline_bytes = requests.get(cur_voiceline_url).content
+                    with open('voicelines/' + folder_name + '/voiceline-' + str(file_index) + '.ogg', 'wb') as cur_voiceline_file:
+                        cur_voiceline_file.write(cur_voiceline_bytes)
 
-                list_of_voicelines = list_of_voicelines[list_of_voicelines.index(voiceline_target_string) + 1:]
-                file_index += 1
-                has_any_voicelines = True
+                    list_of_voicelines = list_of_voicelines[list_of_voicelines.index(voiceline_target_string) + 1:]
+                    file_index += 1
+                    has_any_voicelines = True
+            else:
+                return 'Skin ' + skin_name + ' not found on the wiki.'
         else:
             return 'Nice try.'
     else:
