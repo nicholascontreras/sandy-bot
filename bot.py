@@ -96,22 +96,22 @@ async def load_voicelines_for_ship(ship_name: str, skin_name: str):
                 else:
                     return 'Skin ' + skin_name + ' not found on the wiki.'
 
-                list_of_voicelines = list_of_voicelines[list_of_voicelines.index('<table') : list_of_voicelines.index('</table')]
+            list_of_voicelines = list_of_voicelines[list_of_voicelines.index('<table') : list_of_voicelines.index('</table')]
 
-                voiceline_target_string = '.ogg" title="Play" class="sm2_button">Play</a>'
+            voiceline_target_string = '.ogg" title="Play" class="sm2_button">Play</a>'
 
-                file_index = 0
-                while voiceline_target_string in list_of_voicelines:
-                    cur_voiceline_url = list_of_voicelines[:list_of_voicelines.index(voiceline_target_string) + 4]
-                    cur_voiceline_url = cur_voiceline_url[cur_voiceline_url.rindex('<a href="') + 9:]
+            file_index = 0
+            while voiceline_target_string in list_of_voicelines:
+                cur_voiceline_url = list_of_voicelines[:list_of_voicelines.index(voiceline_target_string) + 4]
+                cur_voiceline_url = cur_voiceline_url[cur_voiceline_url.rindex('<a href="') + 9:]
 
-                    cur_voiceline_bytes = requests.get(cur_voiceline_url).content
-                    with open('voicelines/' + folder_name + '/voiceline-' + str(file_index) + '.ogg', 'wb') as cur_voiceline_file:
-                        cur_voiceline_file.write(cur_voiceline_bytes)
+                cur_voiceline_bytes = requests.get(cur_voiceline_url).content
+                with open('voicelines/' + folder_name + '/voiceline-' + str(file_index) + '.ogg', 'wb') as cur_voiceline_file:
+                    cur_voiceline_file.write(cur_voiceline_bytes)
 
-                    list_of_voicelines = list_of_voicelines[list_of_voicelines.index(voiceline_target_string) + 1:]
-                    file_index += 1
-                    has_any_voicelines = True
+                list_of_voicelines = list_of_voicelines[list_of_voicelines.index(voiceline_target_string) + 1:]
+                file_index += 1
+                has_any_voicelines = True
         else:
             return 'Nice try.'
     else:
