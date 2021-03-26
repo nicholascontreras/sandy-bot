@@ -90,7 +90,12 @@ async def load_voicelines_for_ship(ship_name: str, skin_name: str):
 
         list_of_voicelines = requests.get(new_ship_url).text
         if '<table' in list_of_voicelines:
-            if (not skin_name) or (str(skin_name) + '</span>' in list_of_voicelines):
+            if skin_name:
+                if skin_name + '</span>' in list_of_voicelines:
+                    list_of_voicelines = list_of_voicelines[list_of_voicelines.index(skin_name + '</span>'):]
+                else:
+                    return 'Skin ' + skin_name + ' not found on the wiki.'
+
                 list_of_voicelines = list_of_voicelines[list_of_voicelines.index('<table') : list_of_voicelines.index('</table')]
 
                 voiceline_target_string = '.ogg" title="Play" class="sm2_button">Play</a>'
@@ -107,8 +112,6 @@ async def load_voicelines_for_ship(ship_name: str, skin_name: str):
                     list_of_voicelines = list_of_voicelines[list_of_voicelines.index(voiceline_target_string) + 1:]
                     file_index += 1
                     has_any_voicelines = True
-            else:
-                return 'Skin ' + str(skin_name) + ' not found on the wiki.'
         else:
             return 'Nice try.'
     else:
