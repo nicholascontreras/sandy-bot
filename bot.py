@@ -20,10 +20,8 @@ async def on_ready():
             if ':' in cur_ship_name:
                 cur_skin_name = cur_ship_name[cur_ship_name.index(':') + 1:].strip()
                 cur_ship_name = cur_ship_name[:cur_ship_name.index(':')].strip()
-            try:
-                print('Errors: ' + str(await asyncio.wait_for(load_voicelines_for_ship(cur_ship_name, cur_skin_name), timeout=20)))
-            except asyncio.TimeoutError:
-                print('Timeout')
+
+            print('Errors: ' + str(load_voicelines_for_ship(cur_ship_name, cur_skin_name)))
 
     talk_in_voice_chats.start()
     check_for_events_ending.start()   
@@ -58,12 +56,9 @@ async def on_message(message):
 
 async def set_ship(ship_name: str, skin_name: str, target_guild):
     if not (ship_name + ':' + str(skin_name)) in voiceline_folders:
-        try:
-            error = await asyncio.wait_for(load_voicelines_for_ship(ship_name, skin_name), timeout=20)
-            if error:
-                return 'Unable to become ' + ship_name + ': ' + error
-        except asyncio.TimeoutError:
-            return 'Unable to become ' + ship_name + ': Wiki was too slow to respond.' 
+        error = load_voicelines_for_ship(ship_name, skin_name)
+        if error:
+            return 'Unable to become ' + ship_name + ': ' + error
 
     return_value = ''
     warning = await set_profile_picture(ship_name)
@@ -85,7 +80,10 @@ async def load_voicelines_for_ship(ship_name: str, skin_name: str):
     os.makedirs('voicelines/' + folder_name)
 
     ship_name_target_string = '">' + ship_name + '</a>'
-    list_of_ships = requests.get('https://azurlane.koumakan.jp/List_of_Ships').text
+    try:
+        list_of_ships = requests.get('https://azurlane.koumakan.jp/List_of_Ships', timeout=3).text
+    except requests.Timeout:
+        return 'Wiki is unavailable or too slow to respond.'
 
     if ship_name_target_string in list_of_ships:
         list_of_ships = list_of_ships[:list_of_ships.index(ship_name_target_string)]
