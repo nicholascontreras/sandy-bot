@@ -21,7 +21,7 @@ async def on_ready():
                 cur_skin_name = cur_ship_name[cur_ship_name.index(':') + 1:].strip()
                 cur_ship_name = cur_ship_name[:cur_ship_name.index(':')].strip()
             try:
-                print('Errors: ' + str(await asyncio.wait_for(load_voicelines_for_ship(cur_ship_name, cur_skin_name))))
+                print('Errors: ' + str(await asyncio.wait_for(load_voicelines_for_ship(cur_ship_name, cur_skin_name), timeout=20)))
             except asyncio.TimeoutError:
                 print('Timeout')
 
