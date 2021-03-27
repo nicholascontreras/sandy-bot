@@ -80,7 +80,10 @@ async def load_voicelines_for_ship(ship_name: str, skin_name: str):
     os.makedirs('voicelines/' + folder_name)
 
     ship_name_target_string = '">' + ship_name + '</a>'
-    list_of_ships = requests.get('https://azurlane.koumakan.jp/List_of_Ships').text
+    try:
+        list_of_ships = requests.get('https://azurlane.koumakan.jp/List_of_Ships', timeout=5).text
+    except (requests.Timeout, requests.ConnectionError):
+        return 'The wiki is unavailable or too slow.'
 
     if ship_name_target_string in list_of_ships:
         list_of_ships = list_of_ships[:list_of_ships.index(ship_name_target_string)]
@@ -88,7 +91,11 @@ async def load_voicelines_for_ship(ship_name: str, skin_name: str):
         new_ship_url = new_ship_url[:new_ship_url.index('"')]
         new_ship_url = 'https://azurlane.koumakan.jp' + new_ship_url + '/Quotes'
 
-        list_of_voicelines = requests.get(new_ship_url).text
+        try:
+            list_of_voicelines = requests.get(new_ship_url, timeout=5).text
+        except (requests.Timeout, requests.ConnectionError):
+            return 'The wiki is unavailable or too slow.'
+
         if '<table' in list_of_voicelines:
             if skin_name:
                 if skin_name + '</span>' in list_of_voicelines:
@@ -105,7 +112,11 @@ async def load_voicelines_for_ship(ship_name: str, skin_name: str):
                 cur_voiceline_url = list_of_voicelines[:list_of_voicelines.index(voiceline_target_string) + 4]
                 cur_voiceline_url = cur_voiceline_url[cur_voiceline_url.rindex('<a href="') + 9:]
 
-                cur_voiceline_bytes = requests.get(cur_voiceline_url).content
+                try:
+                    cur_voiceline_bytes = requests.get(cur_voiceline_url, timeout=5).content
+                except (requests.Timeout, requests.ConnectionError):
+                    return 'The wiki is unavailable or too slow.'
+                    
                 with open('voicelines/' + folder_name + '/voiceline-' + str(file_index) + '.ogg', 'wb') as cur_voiceline_file:
                     cur_voiceline_file.write(cur_voiceline_bytes)
 
