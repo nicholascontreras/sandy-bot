@@ -153,11 +153,9 @@ async def talk_in_voice_chats():
 
         cur_voiceline_folder = 'voicelines/' + voiceline_folders[guild.get_member(client.user.id).display_name]
 
-        topmost_voice_channel = guild.voice_channels[0]
-        try:
-            voice_client = await topmost_voice_channel.connect()
-        except discord.ClientException:
-            voice_client = guild.voice_client
+        voice_client = guild.voice_client
+        if not voice_client:
+            voice_client = await guild.voice_channels[0].connect()
 
         # 25% chance to start playing (if we're not already)
         if random.random() < 0.25 and (not voice_client.is_playing()):
@@ -170,11 +168,9 @@ async def talk_in_voice_chats():
 async def introduce_in_voice_chat(guild):
     cur_voiceline_folder = 'voicelines/' + voiceline_folders[guild.get_member(client.user.id).display_name]
 
-    topmost_voice_channel = guild.voice_channels[0]
-    try:
-        voice_client = await topmost_voice_channel.connect()
-    except discord.ClientException:
-        voice_client = guild.voice_client
+    voice_client = guild.voice_client
+    if not voice_client:
+        voice_client = await guild.voice_channels[0].connect()
 
     while voice_client.is_playing():
         time.sleep(1)
