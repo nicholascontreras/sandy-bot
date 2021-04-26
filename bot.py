@@ -173,16 +173,17 @@ async def talk_in_voice_chats():
 async def introduce_in_voice_chat(guild):
     cur_voiceline_folder = 'voicelines/' + voiceline_folders[guild.get_member(client.user.id).display_name]
 
-    voice_client = guild.voice_client
-    if not voice_client:
-        voice_client = await guild.voice_channels[0].connect()
+    for attempt_num in range(15):
+        voice_client = guild.voice_client
+        if not voice_client:
+            voice_client = await guild.voice_channels[0].connect()
 
-    while voice_client.is_playing():
-        time.sleep(1)
-
-    selected_audio_source = cur_voiceline_folder + '/voiceline-0.ogg'
-    audio_source = discord.FFmpegPCMAudio(source=selected_audio_source, executable=os.getenv('FFMPEG_LOCATION', 'ffmpeg.exe'))
-    voice_client.play(audio_source)
+        if voice_client.is_playing():
+            time.sleep(1)
+        else:
+            selected_audio_source = cur_voiceline_folder + '/voiceline-0.ogg'
+            audio_source = discord.FFmpegPCMAudio(source=selected_audio_source, executable=os.getenv('FFMPEG_LOCATION', 'ffmpeg.exe'))
+            voice_client.play(audio_source)
 
 @tasks.loop(hours=1)
 async def check_for_events_ending():
