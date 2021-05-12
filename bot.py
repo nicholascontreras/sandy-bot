@@ -170,6 +170,11 @@ async def talk_in_voice_chats():
             audio_source = discord.FFmpegPCMAudio(source=selected_audio_source, executable=os.getenv('FFMPEG_LOCATION', 'ffmpeg.exe'))
             voice_client.play(audio_source)
 
+@talk_in_voice_chats.error
+async def talk_in_voice_chats_error(error):
+    talk_in_voice_chats.cancel()
+    talk_in_voice_chats.start()
+
 async def introduce_in_voice_chat(guild):
     cur_voiceline_folder = 'voicelines/' + voiceline_folders[guild.get_member(client.user.id).display_name]
 
