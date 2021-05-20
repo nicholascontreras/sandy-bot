@@ -5,7 +5,7 @@ import discord
 from discord.ext import tasks
 
 voiceline_folders = {
-    'Torricelli:None': 'torricelli'
+    'Torricelli': 'torricelli'
 }
 
 client = discord.Client()
