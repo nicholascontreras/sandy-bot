@@ -4,8 +4,10 @@ import asyncio
 import discord
 from discord.ext import tasks
 
-voiceline_folders = {
-    'Torricelli': 'torricelli'
+voiceline_folders = {}
+
+custom_folders = {
+    'Torricelli:None': 'torricelli'
 }
 
 client = discord.Client()
@@ -57,10 +59,12 @@ async def on_message(message):
         await message.channel.send(file=img_file)
 
 async def set_ship(ship_name: str, skin_name: str, target_guild):
-    if not (ship_name + ':' + str(skin_name)) in voiceline_folders:
+    if not (ship_name + ':' + str(skin_name)) in custom_folders:
         error = await load_voicelines_for_ship(ship_name, skin_name)
         if error:
             return 'Unable to become ' + ship_name + ': ' + error
+    else:
+        voiceline_folders[ship_name] = custom_folders[ship_name + ':' + str(skin_name)]
 
     return_value = ''
     warning = await set_profile_picture(ship_name)
