@@ -4,7 +4,9 @@ import asyncio
 import discord
 from discord.ext import tasks
 
-voiceline_folders = {}
+voiceline_folders = {
+    'Torricelli:None': 'torricelli'
+}
 
 client = discord.Client()
 
