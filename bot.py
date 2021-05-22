@@ -25,10 +25,10 @@ async def on_ready():
                 cur_skin_name = cur_ship_name[cur_ship_name.index(':') + 1:].strip()
                 cur_ship_name = cur_ship_name[:cur_ship_name.index(':')].strip()
 
-            if not (cur_ship_name + ':None') in custom_folders:
+            if not (cur_ship_name + ':' + str(cur_skin_name)) in custom_folders:
                 print('Errors: ' + str(await load_voicelines_for_ship(cur_ship_name, cur_skin_name)))
             else:
-                voiceline_folders[ship_name] = custom_folders[cur_ship_name + ':None']
+                voiceline_folders[cur_ship_name] = custom_folders[cur_ship_name + ':' + str(cur_skin_name)]
 
     talk_in_voice_chats.start()
     check_for_events_ending.start()   
