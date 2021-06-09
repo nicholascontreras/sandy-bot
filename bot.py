@@ -202,8 +202,8 @@ async def introduce_in_voice_chat(guild):
 @tasks.loop(hours=1)
 async def check_for_events_ending():
     events_text = requests.get('https://azurlane.koumakan.jp/Azur_Lane_Wiki').text
-    events_text = events_text[events_text.index('English Server News'):]
-    events_text = events_text[:events_text.index('Chinese/Japanese Server News')]
+    events_text = events_text[events_text.index('<div class="azl_box_title">News</div>'):]
+    events_text = events_text[:events_text.index('<a href="/Campaign" title="Campaign">Campaign</a>')]
 
     while events_text.find('class="azl_news_title') > -1:
         events_text = events_text[events_text.index('class="azl_news_title') + 1:]
