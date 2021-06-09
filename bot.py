@@ -224,7 +224,7 @@ async def check_for_events_ending():
 
             cur_event_end_month = cur_event_end_date[:cur_event_end_date.index(' ')]
             cur_event_end_day = cur_event_end_date[cur_event_end_date.index(' ') + 1:]
-            cur_event_end_day = cur_event_end_day.replace('st', '').replace('nd', '').replace('rd', '').replace('th', '')
+            cur_event_end_day = cur_event_end_day.replace('st', '').replace('nd', '').replace('rd', '').replace('th', '').replace('*', '')
             cur_event_end_day = int(cur_event_end_day)
 
             server_datetime = datetime.datetime.now() - datetime.timedelta(hours=7)
