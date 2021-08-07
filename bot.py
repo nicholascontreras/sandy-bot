@@ -7,6 +7,7 @@ from discord.ext import tasks
 voiceline_folders = {}
 
 custom_folders = {
+    'Akagi-chan:None' 'eee'
 }
 
 client = discord.Client()
@@ -27,6 +28,7 @@ async def on_ready():
             if not (cur_ship_name + ':' + str(cur_skin_name)) in custom_folders:
                 print('Errors: ' + str(await load_voicelines_for_ship(cur_ship_name, cur_skin_name)))
             else:
+                print('Loading custom voiceline folder for ' + cur_ship_name)
                 voiceline_folders[cur_ship_name] = custom_folders[cur_ship_name + ':' + str(cur_skin_name)]
 
     talk_in_voice_chats.start()
