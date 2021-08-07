@@ -7,7 +7,8 @@ from discord.ext import tasks
 voiceline_folders = {}
 
 custom_folders = {
-    'Kaga:None': 'pizza'
+    'Kaga:None': 'pizza',
+    'Cleveland:None': 'fart'
 }
 
 client = discord.Client()
