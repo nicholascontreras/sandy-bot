@@ -153,7 +153,6 @@ async def set_profile_picture(ship_name: str):
     new_ship_image_url = new_ship_image_url[new_ship_image_url.index('<img'):]
     new_ship_image_url = new_ship_image_url[new_ship_image_url.index('src="') + 5:]
     new_ship_image_url = new_ship_image_url[:new_ship_image_url.index('"')]
-    new_ship_image_url = 'https://azurlane.koumakan.jp' + new_ship_image_url
 
     new_ship_image_bytes = requests.get(new_ship_image_url).content
     try:
