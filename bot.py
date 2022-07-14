@@ -169,7 +169,7 @@ async def talk_in_voice_chats():
         cur_voiceline_folder = 'voicelines/' + voiceline_folders[guild.get_member(client.user.id).display_name]
 
         voice_client = guild.voice_client
-        if not voice_client:
+        if not voice_client or not voice_client.is_connected():
             voice_client = await guild.voice_channels[0].connect()
 
         # 25% chance to start playing (if we're not already)
@@ -190,7 +190,7 @@ async def introduce_in_voice_chat(guild):
 
     for attempt_num in range(15):
         voice_client = guild.voice_client
-        if not voice_client:
+        if not voice_client or not voice_client.is_connected():
             voice_client = await guild.voice_channels[0].connect()
 
         if voice_client.is_playing():
