@@ -174,7 +174,7 @@ async def talk_in_voice_chats():
             audio_files = os.listdir(cur_voiceline_folder)
             selected_audio_source = cur_voiceline_folder + '/' + random.choice(audio_files)
 
-            audio_source = discord.FFmpegPCMAudio(source=selected_audio_source, executable=os.getenv('FFMPEG_LOCATION', 'ffmpeg.exe'))
+            audio_source = discord.FFmpegPCMAudio(source=selected_audio_source, executable='ffmpeg')
             voice_client.play(audio_source)
 
 @talk_in_voice_chats.error
@@ -194,7 +194,7 @@ async def introduce_in_voice_chat(guild):
             time.sleep(1)
         else:
             selected_audio_source = cur_voiceline_folder + '/voiceline-0.ogg'
-            audio_source = discord.FFmpegPCMAudio(source=selected_audio_source, executable=os.getenv('FFMPEG_LOCATION', 'ffmpeg.exe'))
+            audio_source = discord.FFmpegPCMAudio(source=selected_audio_source, executable='ffmpeg')
             voice_client.play(audio_source)
 
 client.run(os.getenv('DISCORD_TOKEN'))
