@@ -7,8 +7,6 @@ from discord.ext import tasks
 voiceline_folders = {}
 
 custom_folders = {
-    'Prinz Eugen:None': 'eee',
-    'Torricelli:None': 'pasta'
 }
 
 client = discord.Client()
@@ -33,7 +31,6 @@ async def on_ready():
                 voiceline_folders[cur_ship_name] = custom_folders[cur_ship_name + ':' + str(cur_skin_name)]
 
     talk_in_voice_chats.start()
-    check_for_events_ending.start()   
 
 @client.event
 async def on_message(message):
@@ -199,43 +196,5 @@ async def introduce_in_voice_chat(guild):
             selected_audio_source = cur_voiceline_folder + '/voiceline-0.ogg'
             audio_source = discord.FFmpegPCMAudio(source=selected_audio_source, executable=os.getenv('FFMPEG_LOCATION', 'ffmpeg.exe'))
             voice_client.play(audio_source)
-
-@tasks.loop(hours=1)
-async def check_for_events_ending():
-    events_text = requests.get('https://azurlane.koumakan.jp/Azur_Lane_Wiki').text
-    events_text = events_text[events_text.index('<div class="azl_box_title">News</div>'):]
-    events_text = events_text[:events_text.index('<a href="/Campaign" title="Campaign">Campaign</a>')]
-
-    while events_text.find('class="azl_news_title') > -1:
-        events_text = events_text[events_text.index('class="azl_news_title') + 1:]
-        events_text = events_text[events_text.index('<a') + 1:]
-        events_text = events_text[events_text.index('>') + 1:]
-
-        cur_event_name = events_text[:events_text.index('</a>')]
-        cur_event_name = cur_event_name.replace('[ONGOING]', '').strip()
-
-        events_text = events_text[events_text.index('class="azl_news_message') + 1:]
-        events_text = events_text[events_text.index('<a') + 1:]
-        events_text = events_text[events_text.index('>') + 1:]
-
-        cur_event_message = events_text[:events_text.index('</a>')].strip()
-        if cur_event_message.startswith('('):
-            cur_event_date_range = cur_event_message[1:cur_event_message.index(')')]
-            cur_event_end_date = cur_event_date_range[cur_event_date_range.index('-') + 1:].strip()
-
-            cur_event_end_month = cur_event_end_date[:cur_event_end_date.index(' ')]
-            cur_event_end_day = cur_event_end_date[cur_event_end_date.index(' ') + 1:]
-            cur_event_end_day = cur_event_end_day.replace('st', '').replace('nd', '').replace('rd', '').replace('th', '').replace('*', '')
-            cur_event_end_day = int(cur_event_end_day)
-
-            server_datetime = datetime.datetime.now() - datetime.timedelta(hours=7)
-
-            if (calendar.month_name[server_datetime.month] == cur_event_end_month) and (server_datetime.day == cur_event_end_day):
-                if server_datetime.hour == 12:
-                    for guild in client.guilds:
-                        for text_channel in guild.text_channels:
-                            if text_channel.name == 'azur-lane-chat':
-                                await text_channel.send(content='*' + cur_event_name + '* ends today')
-
 
 client.run(os.getenv('DISCORD_TOKEN'))
