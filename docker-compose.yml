@@ -1,0 +1,14 @@
+services:
+  sandy-bot:
+    build: .
+    container_name: sandy-bot
+    env_file:
+      - .env
+    volumes:
+      - sandy-bot-volume:/voicelines
+    restart: always
+
+volumes:
+  sandy-bot-volume:
+    name: sandy-bot-volume
+    external: true
