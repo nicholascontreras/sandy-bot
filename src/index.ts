@@ -64,7 +64,7 @@ client.on('interactionCreate', async interaction => {
 	if (!interaction.isChatInputCommand()) return;
 	
     if (interaction.commandName === 'transform') {
-        await interaction.deferReply({ ephemeral: false });
+        await interaction.deferReply({ ephemeral: true });
         const result = await transformBot(interaction.options.getString('ship'), interaction.options.getString('skin') || 'Default');
         await interaction.editReply(result);
     } else if (interaction.commandName === 'reboot') {
@@ -82,8 +82,18 @@ const playRandomQuotes = async () => {
         }
     }
     
-    const waitTime = Math.ceil(Math.random() * (1000 * 90)) + (1000 * 20);
+    const waitTime = Math.ceil(randomGaussian() * (1000 * 120)) + (1000 * 30);
     setTimeout(playRandomQuotes, waitTime);
+};
+
+const randomGaussian = (): number => {
+    let u = 0, v = 0;
+    while(u === 0) u = Math.random(); //Converting [0,1) to (0,1)
+    while(v === 0) v = Math.random();
+    let num = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
+    num = num / 10.0 + 0.5; // Translate to 0 -> 1
+    if (num >= 1 || num < 0) return randomGaussian() // resample between 0 and 1
+    return num
 };
 
 // Play a quote in all of the servers we're connected to
