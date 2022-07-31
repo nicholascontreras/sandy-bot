@@ -60,6 +60,7 @@ client.on('interactionCreate', async interaction => {
         const result = await transformBot(interaction.options.getString('ship'), interaction.options.getString('skin') || 'Default');
         await interaction.editReply(result);
     } else if (interaction.commandName === 'reboot') {
+        await interaction.reply({ content: 'Rebooting...', ephemeral: true });
         exit(0);
     }
 });
