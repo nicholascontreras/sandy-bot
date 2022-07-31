@@ -31,9 +31,7 @@ client.once('ready', () => {
     const existingNickname = firstGuild.members.me.displayName;
     
     if (allShips.includes(existingNickname)) {
-        curShip = existingNickname;
-        curSkin = 'Default';
-        playQuote(0);
+        transformBot(existingNickname, 'Default');
     }
 
     setTimeout(playRandomQuotes, 100);
