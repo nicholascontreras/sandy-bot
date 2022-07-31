@@ -56,7 +56,7 @@ client.on('interactionCreate', async interaction => {
 	if (!interaction.isChatInputCommand()) return;
 	
     if (interaction.commandName === 'transform') {
-        await interaction.deferReply({ ephemeral: false });
+        await interaction.deferReply({ ephemeral: true });
         const result = await transformBot(interaction.options.getString('ship'), interaction.options.getString('skin') || 'Default');
         await interaction.editReply(result);
     } else if (interaction.commandName === 'reboot') {
