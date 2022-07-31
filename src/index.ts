@@ -56,7 +56,7 @@ client.on('interactionCreate', async interaction => {
 	if (!interaction.isChatInputCommand()) return;
 	
     if (interaction.commandName === 'transform') {
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ ephemeral: false });
         const result = await transformBot(interaction.options.getString('ship'), interaction.options.getString('skin') || 'Default');
         await interaction.editReply(result);
     } else if (interaction.commandName === 'reboot') {
@@ -111,9 +111,11 @@ const playQuote = async (quoteIndex: number): Promise<void> => {
         });  
     });
 
-    console.log(`Playing: ${quoteIndex}`);
-    console.log(`File: ${quoteFile}`);
-    quotePlayer.play(resource);
+    setTimeout(() => {
+        console.log(`Playing: ${quoteIndex}`);
+        console.log(`File: ${quoteFile}`);
+        quotePlayer.play(resource);
+    }, 1000);
 };
 
 // Rejoin the topmost voice channel in all guilds we're a part of
