@@ -26,6 +26,16 @@ let quotePlayer: AudioPlayer = null;
 
 client.once('ready', () => {
     console.log('Bot ready');
+
+    const firstGuild = client.guilds.cache.map(g => g)[0];
+    const existingNickname = firstGuild.members.me.displayName;
+    
+    if (allShips.includes(existingNickname)) {
+        curShip = existingNickname;
+        curSkin = 'Default';
+        playQuote(0);
+    }
+
     setTimeout(playRandomQuotes, 100);
 });
 
