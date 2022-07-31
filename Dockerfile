@@ -1,12 +1,16 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3
+FROM node:16
 
 WORKDIR /app
 
-COPY . .
-RUN pip3 install -r requirements.txt
-RUN apt-get update -y
-RUN apt-get install ffmpeg -y
+COPY src/ src/
+COPY package.json package.json
+COPY package-lock.json package-lock.json
+COPY tsconfig.json tsconfig.json
+COPY imgs/ imgs/
 
-CMD [ "python", "bot.py" ]
+RUN apt-get update
+RUN apt-get install -y ffmpeg
+RUN npm install --ignore-scripts=false --verbose sharp
+CMD [ "npx", "ts-node", "src/index.ts" ]
