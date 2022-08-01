@@ -24,8 +24,6 @@ let curSkin = '';
 
 let quotePlayer: AudioPlayer = null;
 
-process.on("unhandledRejection", error => console.error("Promise rejection:", error));
-
 client.once('ready', () => {
     console.log('Bot ready');
 
@@ -122,13 +120,17 @@ const playQuote = async (quoteIndex: number): Promise<void> => {
         console.log(`Attached to voice channel in guild: ${curGuild.id}`);
     }
 
-    entersState(quotePlayer, AudioPlayerStatus.Playing, 5000).then(() => {
+    entersState(quotePlayer, AudioPlayerStatus.Playing, 1000 * 5).then(() => {
         console.log('Began playing');
-        entersState(quotePlayer, AudioPlayerStatus.Idle, 30000).then(() => {
+        entersState(quotePlayer, AudioPlayerStatus.Idle, 1000 * 120).then(() => {
             console.log('Quote ended, stopping');
             quotePlayer.stop();
             quotePlayer = null;
-        });  
+        }).catch(err => {
+            console.error('Quote failed to end in time', err);
+        });
+    }).catch(err => {
+        console.error('Failed to start quote in time', err);
     });
 
     setTimeout(() => {
