@@ -24,6 +24,8 @@ let curSkin = '';
 
 let quotePlayer: AudioPlayer = null;
 
+process.on("unhandledRejection", error => console.error("Promise rejection:", error));
+
 client.once('ready', () => {
     console.log('Bot ready');
 
@@ -31,7 +33,7 @@ client.once('ready', () => {
     const existingNickname = firstGuild.members.me.displayName;
     
     if (allShips.includes(existingNickname)) {
-        transformBot(existingNickname, 'Default');
+        transformBot(existingNickname, 'Default', false);
     }
 
     setTimeout(playRandomQuotes, 100);
@@ -232,7 +234,7 @@ const getAllSkins = async () => {
 };
 
 // Transforms the bot into the ship and skin given, plays the intro quote
-const transformBot = async (ship: string, skin: string): Promise<string> => {
+const transformBot = async (ship: string, skin: string, setNameAndPicture: boolean = true): Promise<string> => {
     if (!allShips.includes(ship)) {
         return `*${ship}* is not a valid ship name.`;
     } else if (!allSkins.includes(skin)) {
@@ -248,7 +250,9 @@ const transformBot = async (ship: string, skin: string): Promise<string> => {
     }
 
     await downloadQuotes(ship, skin, quoteURLs.slice(0, 1));
-    await setNameAndPictureTo(ship);
+    if (setNameAndPicture) {
+        await setNameAndPictureTo(ship);
+    }
 
     curShip = ship;
     curSkin = skin;   
