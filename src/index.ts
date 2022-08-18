@@ -128,9 +128,13 @@ const playQuote = async (quoteIndex: number): Promise<void> => {
             quotePlayer = null;
         }).catch(err => {
             console.error('Quote failed to end in time', err);
+            quotePlayer.stop();
+            quotePlayer = null;
         });
     }).catch(err => {
         console.error('Failed to start quote in time', err);
+        quotePlayer.stop();
+        quotePlayer = null;
     });
 
     setTimeout(() => {
