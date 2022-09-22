@@ -322,7 +322,10 @@ const getQuotesFromQuotesPage = async (pageURL: string, skin:string): Promise<Ar
     if (!allQuotesHTML.includes(skinNameHeader)) {
         skinNameHeader = `">${skin} Skin</span>`
         if (!allQuotesHTML.includes(skinNameHeader)) {
-            return `*${skin}* is not a valid skin for the given ship`;
+            skinNameHeader = `">${skin} skin</span>`
+            if (!allQuotesHTML.includes(skinNameHeader)) {
+                return `*${skin}* is not a valid skin for the given ship`;
+            }
         }
     }
     allQuotesHTML = skipPast(allQuotesHTML, skinNameHeader);
@@ -339,7 +342,7 @@ const getQuotesFromQuotesPage = async (pageURL: string, skin:string): Promise<Ar
     }
 
     if (curSkinQuoteURLs.length == 0) {
-        return `${skin} has no voice-lines`;
+        return `No voice-lines for the the skin *${skin}*`;
     } else {
         return curSkinQuoteURLs;
     }
