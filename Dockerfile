@@ -13,8 +13,9 @@ RUN npm run build
 
 
 
-# Minimal node container for running compiled js
-FROM node:alpine
+# Normally would use alpine to run the compiled js but we require
+# ffmpeg, opus, etc... so it's easier to use a fatter distro 
+FROM node
 WORKDIR /usr/app
 
 COPY imgs/ imgs/
