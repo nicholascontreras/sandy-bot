@@ -5,10 +5,10 @@ WORKDIR /usr/app
 
 COPY ./package.json package.json
 COPY ./package-lock.json package-lock.json
+RUN npm ci
+
 COPY ./tsconfig.json tsconfig.json
 COPY ./src src
-
-RUN npm ci
 RUN npm run build
 
 
@@ -18,15 +18,14 @@ RUN npm run build
 FROM node
 WORKDIR /usr/app
 
-COPY imgs/ imgs/
-
 RUN apt-get update
 RUN apt-get install -y ffmpeg
 
 COPY ./package.json package.json
 COPY ./package-lock.json package-lock.json
-COPY --from=builder /usr/app/dist dist
-
 RUN npm ci --omit=dev
+
+COPY imgs/ imgs/
+COPY --from=builder /usr/app/dist dist
 
 CMD [ "npm", "start" ]
