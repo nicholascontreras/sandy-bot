@@ -33,7 +33,6 @@ let allSkins: string[];
 let curShip = '';
 let curSkin = '';
 
-let quotePlayer = createAudioPlayer();
 let quotePlaying = false;
 
 client.once('ready', () => {
@@ -112,8 +111,7 @@ const randomGaussian = (): number => {
 // For improved reliability we make no assumptions about our VC status
 // and therefore attempt to reconnect and rebuild our audio output every time
 const playQuote = async (quoteIndex: number): Promise<void> => {
-    quotePlayer.stop(true);
-    quotePlayer = createAudioPlayer();
+    const quotePlayer = createAudioPlayer();
 
     const quotesFolder = getQuotesFolderFor(curShip, curSkin);
     const quoteFile = path.resolve(`${quotesFolder}/${quoteIndex}.ogg`);
@@ -139,6 +137,7 @@ const playQuote = async (quoteIndex: number): Promise<void> => {
         console.log('Began playing');
         entersState(quotePlayer, AudioPlayerStatus.Idle, 1000 * 120).then(() => {
             console.log('Quote ended normally');
+            quotePlayer.stop();
             quotePlaying = false;
         }).catch(err => {
             console.error('Quote failed to end in time', err);
