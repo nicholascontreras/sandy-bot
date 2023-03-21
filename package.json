@@ -9,8 +9,8 @@
         "@discordjs/voice": "^0.11.0",
         "axios": "^0.27.2",
         "discord.js": "^14.0.3",
-        "sharp": "^0.30.7",
-        "sodium-native": "^4.0.1"
+        "sharp": "^0.31.3",
+        "sodium-native": "^3.4.1"
     },
     "devDependencies": {
         "@types/node": "^18.15.5",
