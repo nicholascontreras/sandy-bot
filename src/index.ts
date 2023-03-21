@@ -33,7 +33,7 @@ let allSkins: string[];
 let curShip = '';
 let curSkin = '';
 
-let quotePlayer: AudioPlayer;
+let quotePlayer = createAudioPlayer();
 let quotePlaying = false;
 
 client.once('ready', () => {
