@@ -1,16 +1,31 @@
-# syntax=docker/dockerfile:1
+# Full size node container with dev dependencies
+# Used to build our ts into js
+FROM node as builder
+WORKDIR /usr/app
 
-FROM node:16
+COPY ./package.json package.json
+COPY ./package-lock.json package-lock.json
+COPY ./tsconfig.json tsconfig.json
+COPY ./src src
 
-WORKDIR /app
+RUN npm ci
+RUN npm run build
 
-COPY src/ src/
-COPY package.json package.json
-COPY package-lock.json package-lock.json
-COPY tsconfig.json tsconfig.json
+
+
+# Minimal node container for running compiled js
+FROM node:alpine
+WORKDIR /usr/app
+
 COPY imgs/ imgs/
 
 RUN apt-get update
 RUN apt-get install -y ffmpeg
-RUN npm install --ignore-scripts=false --verbose sharp
-CMD [ "npx", "ts-node", "src/index.ts" ]
+
+COPY ./package.json package.json
+COPY ./package-lock.json package-lock.json
+COPY --from=builder /usr/app/dist dist
+
+RUN npm ci --omit=dev
+
+CMD [ "npm", "start" ]
