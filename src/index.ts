@@ -409,7 +409,7 @@ const downloadQuotes = async (ship: string, skin: string, quoteURLs: Array<strin
         const outputFile = `${folderName}/${i}.ogg`;
 
         const today = new Date();
-        if (today.getMonth() === 5 && today.getDate() === 1) {
+        if (today.getMonth() === 3 && today.getDate() === 1) {
             const temp = `${folderName}/${i}a.ogg`;
             fs.writeFileSync(temp, res.data);
             execSync(`ffmpeg -i "${temp}" -af areverse "${outputFile}"`);
