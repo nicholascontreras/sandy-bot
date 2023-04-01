@@ -412,7 +412,7 @@ const downloadQuotes = async (ship: string, skin: string, quoteURLs: Array<strin
         if (today.getMonth() === 3 && today.getDate() === 1) {
             const temp = `${folderName}/${i}a.ogg`;
             fs.writeFileSync(temp, res.data);
-            execSync(`ffmpeg -i "${temp}" -af areverse "${outputFile}"`);
+            execSync(`ffmpeg -hide_banner -loglevel error -y -i "${temp}" -af areverse "${outputFile}"`);
             if (fs.existsSync(outputFile)) {
                 console.log("Audio reverse successful");
                 fs.rmSync(temp);
