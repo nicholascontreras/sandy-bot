@@ -46,7 +46,7 @@ client.once('ready', () => {
         transformBot(existingNickname, 'Default', false);
     }
 
-    setTimeout(playRandomQuotes, 5000);
+    setTimeout(playRandomQuotes, 100);
 });
 
 client.on('interactionCreate', async (interaction) => {
@@ -287,7 +287,7 @@ const transformBot = async (ship: string, skin: string, setNameAndPicture: boole
     curSkin = skin;
     await playQuote(0);
     setTimeout(async () => {
-        await downloadQuotes(ship, skin, quoteURLs.slice(1));
+        await downloadQuotes(ship, skin, quoteURLs.slice(1), 1);
     }, 1);
 
     return `Successfully became ${ship}${skin === 'Default' ? '' : ` [${skin}]`}`;
@@ -390,13 +390,13 @@ const getQuotesFromQuotesPage = async (pageURL: string, skin: string): Promise<A
 };
 
 // Download all the given quote URLs
-const downloadQuotes = async (ship: string, skin: string, quoteURLs: Array<string>): Promise<void> => {
+const downloadQuotes = async (ship: string, skin: string, quoteURLs: Array<string>, indexOffset: number = 0): Promise<void> => {
     const folderName = getQuotesFolderFor(ship, skin);
     if (!fs.existsSync(folderName)) {
         fs.mkdirSync(folderName, { recursive: true });
     }
 
-    for (let i = 0; i < quoteURLs.length; i++) {
+    for (let i = indexOffset; i < quoteURLs.length + indexOffset; i++) {
         console.log(`Downloading ${quoteURLs[i]}`);
 
         const res = await axios.get(quoteURLs[i], {
