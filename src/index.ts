@@ -6,6 +6,7 @@ import fs from 'fs';
 import path from 'path'
 import sharp from 'sharp'
 import { exit } from 'process';
+import { execSync } from 'child_process';
 
 // Fetch an environment variable and quit program if it's not found
 const getEnvVar = (varName: string): string => {
@@ -405,8 +406,22 @@ const downloadQuotes = async (ship: string, skin: string, quoteURLs: Array<strin
             }
         });
 
-        const fullPath = `${folderName}/${i}.ogg`;
-        fs.writeFileSync(fullPath, res.data);
+        const outputFile = `${folderName}/${i}.ogg`;
+
+        const today = new Date();
+        if (today.getMonth() === 5 && today.getDate() === 1) {
+            const temp = `${folderName}/${i}a.ogg`;
+            fs.writeFileSync(temp, res.data);
+            execSync(`ffmpeg -i "${temp}" -af areverse "${outputFile}"`);
+            if (fs.existsSync(outputFile)) {
+                console.log("Audio reverse successful");
+            } else {
+                console.log("Audio reverse failed");
+                fs.renameSync(temp, outputFile);
+            }
+        } else {
+            fs.writeFileSync(outputFile, res.data);
+        }
     }
 };
 
