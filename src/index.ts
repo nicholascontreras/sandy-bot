@@ -396,8 +396,8 @@ const downloadQuotes = async (ship: string, skin: string, quoteURLs: Array<strin
         fs.mkdirSync(folderName, { recursive: true });
     }
 
-    for (let i = indexOffset; i < quoteURLs.length + indexOffset; i++) {
-        console.log(`Downloading ${quoteURLs[i]}`);
+    for (let i = 0; i < quoteURLs.length; i++) {
+        console.log(`Downloading ${quoteURLs[i]} ${indexOffset && ` (index offset: ${indexOffset})`}`);
 
         const res = await axios.get(quoteURLs[i], {
             responseType: 'arraybuffer',
@@ -406,11 +406,11 @@ const downloadQuotes = async (ship: string, skin: string, quoteURLs: Array<strin
             }
         });
 
-        const outputFile = `${folderName}/${i}.ogg`;
+        const outputFile = `${folderName}/${i + indexOffset}.ogg`;
 
         const today = new Date();
         if (today.getMonth() === 3 && today.getDate() === 1) {
-            const temp = `${folderName}/${i}a.ogg`;
+            const temp = `${folderName}/${i + indexOffset}a.ogg`;
             fs.writeFileSync(temp, res.data);
             execSync(`ffmpeg -hide_banner -loglevel error -y -i "${temp}" -af areverse "${outputFile}"`);
             if (fs.existsSync(outputFile)) {
