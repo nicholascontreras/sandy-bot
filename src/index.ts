@@ -46,7 +46,7 @@ client.once('ready', () => {
         transformBot(existingNickname, 'Default', false);
     }
 
-    setTimeout(playRandomQuotes, 100);
+    setTimeout(playRandomQuotes, 5000);
 });
 
 client.on('interactionCreate', async (interaction) => {
@@ -415,6 +415,7 @@ const downloadQuotes = async (ship: string, skin: string, quoteURLs: Array<strin
             execSync(`ffmpeg -i "${temp}" -af areverse "${outputFile}"`);
             if (fs.existsSync(outputFile)) {
                 console.log("Audio reverse successful");
+                fs.rmSync(temp);
             } else {
                 console.log("Audio reverse failed");
                 fs.renameSync(temp, outputFile);
