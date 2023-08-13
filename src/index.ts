@@ -232,30 +232,52 @@ const getAllShips = async () => {
 };
 
 // Get all the skins from the wiki
+// This has become somewhat more complicated as the wiki no longer has a single page with every skin on it.
+// Instead, now the wiki has a list of skin categories, each being a link to a list of skins in that category.
+// So we must traverse the main page, get the link to each category page, and scrape the individual skins from
+// those category pages. Currently we do this sequentially which is slow, but we only do this once at
+// startup so simplicity is preferred over performance here.
 const getAllSkins = async () => {
-    const res = await axios.get(`${WIKI_URL_BASE}Skins`, {
+    // Get the page containing all the skin categories
+    const resCategories = await axios.get(`${WIKI_URL_BASE}Skins`, {
         headers: {
             'User-Agent': USER_AGENT
         }
     });
 
-    let skinListHTML: string = res.data;
-    skinListHTML = skipPast(skinListHTML, 'id="List_of_skins"');
+    let skinCategoriesHTML: string = resCategories.data;
+    skinCategoriesHTML = skipPast(skinCategoriesHTML, 'id="List_of_skins"');
 
     let allSkins = [];
 
-    while (skinListHTML.includes('class="azl-shipcard small"')) {
-        // Parse a skin
-        skinListHTML = skipPast(skinListHTML, 'class="azl-shipcard small"');
-        skinListHTML = skipPast(skinListHTML, 'class="alc-bottom"');
-        skinListHTML = skipPast(skinListHTML, '<b>');
+    while (skinCategoriesHTML.includes('class="skins-category"')) {
+        // Parse a skin category into the url for the page listing all the skins in this category
+        skinCategoriesHTML = skipPast(skinCategoriesHTML, 'class="azl-shipcard small"');
+        skinCategoriesHTML = skipPast(skinCategoriesHTML, '<a href="/wiki/>');
+        let curSkinCategoryURL = extractUntil(skinCategoriesHTML, '"');
 
-        let curSkinName = extractUntil(skinListHTML, '</b>');
-        if (curSkinName.endsWith('Skin')) {
-            curSkinName = curSkinName.substring(0, curSkinName.length - 4).trim();
+        // Get the page containing the list of skins in this category
+        const resSkins = await axios.get(`${WIKI_URL_BASE}${curSkinCategoryURL}`, {
+            headers: {
+                'User-Agent': USER_AGENT
+            }
+        });
+
+        let skinsHTML: string = resSkins.data;
+
+        while (skinsHTML.includes('class="azl-shipcard small"')) {
+            // Parse a skin
+            skinsHTML = skipPast(skinsHTML, 'class="azl-shipcard small"');
+            skinsHTML = skipPast(skinsHTML, 'class="alc-bottom"');
+            skinsHTML = skipPast(skinsHTML, '<b>');
+
+            let curSkinName = extractUntil(skinsHTML, '</b>');
+            if (curSkinName.endsWith('Skin')) {
+                curSkinName = curSkinName.substring(0, curSkinName.length - 4).trim();
+            }
+
+            allSkins.push(curSkinName);
         }
-
-        allSkins.push(curSkinName);
     }
 
     // Remove duplicate names ('Retrofit', 'Oath', ...) and add 'Default' option
@@ -365,7 +387,7 @@ const getQuotesFromQuotesPage = async (pageURL: string, skin: string): Promise<A
         if (!allQuotesHTML.includes(skinNameHeader)) {
             skinNameHeader = `">${skin} skin</span>`
             if (!allQuotesHTML.includes(skinNameHeader)) {
-                return `*${skin}* is not a valid skin for the given ship`;
+                return `*${skin}* is not a valid skin for the given ship.`;
             }
         }
     }
@@ -397,7 +419,7 @@ const downloadQuotes = async (ship: string, skin: string, quoteURLs: Array<strin
     }
 
     for (let i = 0; i < quoteURLs.length; i++) {
-        console.log(`Downloading ${quoteURLs[i]} ${indexOffset && ` (index offset: ${indexOffset})`}`);
+        console.log(`Downloading ${quoteURLs[i]} (index offset: ${indexOffset})`);
 
         const res = await axios.get(quoteURLs[i], {
             responseType: 'arraybuffer',
