@@ -253,7 +253,7 @@ const getAllSkins = async () => {
 
     while (skinCategoriesHTML.includes('class="skins-category"')) {
         // Parse a skin category into the url for the page listing all the skins in this category
-        skinCategoriesHTML = skipPast(skinCategoriesHTML, 'class="azl-shipcard small"');
+        skinCategoriesHTML = skipPast(skinCategoriesHTML, '<img');
         skinCategoriesHTML = skipPast(skinCategoriesHTML, '<a href="/wiki/>');
         let curSkinCategoryURL = extractUntil(skinCategoriesHTML, '"');
 
