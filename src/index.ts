@@ -254,7 +254,7 @@ const getAllSkins = async () => {
     while (skinCategoriesHTML.includes('class="skins-category"')) {
         // Parse a skin category into the url for the page listing all the skins in this category
         skinCategoriesHTML = skipPast(skinCategoriesHTML, '<img');
-        skinCategoriesHTML = skipPast(skinCategoriesHTML, '<a href="/wiki/>');
+        skinCategoriesHTML = skipPast(skinCategoriesHTML, '<a href="/wiki/');
         let curSkinCategoryURL = extractUntil(skinCategoriesHTML, '"');
 
         // Get the page containing the list of skins in this category
