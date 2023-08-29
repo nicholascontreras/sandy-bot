@@ -220,10 +220,11 @@ const getAllShips = async () => {
     while (shipListHTML.includes('<td data-sort-value=')) {
         // Parse a ship
         shipListHTML = skipPast(shipListHTML, '<td data-sort-value="');
+        shipListHTML = skipPast(shipListHTML, '</td>');
         shipListHTML = skipPast(shipListHTML, '<a href="/wiki/');
-        shipListHTML = skipPast(shipListHTML, 'title="');
+        shipListHTML = skipPast(shipListHTML, '">');
 
-        const curShipName = extractUntil(shipListHTML, '"');
+        const curShipName = extractUntil(shipListHTML, '</a>');
         allShips.push(curShipName);
 
         shipListHTML = skipPast(shipListHTML, '</tr>');
