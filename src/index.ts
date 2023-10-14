@@ -287,6 +287,8 @@ const getAllSkins = async () => {
 
 // Transforms the bot into the ship and skin given, plays the intro quote
 const transformBot = async (ship: string, skin: string, setNameAndPicture: boolean = true): Promise<string> => {
+    console.log(`Transform Bot: ${ship} [${skin}] ${setNameAndPicture}`);
+
     if (!allShips.includes(ship)) {
         return `*${ship}* is not a valid ship name.`;
     } else if (!allSkins.includes(skin)) {
@@ -294,7 +296,7 @@ const transformBot = async (ship: string, skin: string, setNameAndPicture: boole
     }
 
     const quotesURL = `${await getURLForShip(ship)}/Quotes`;
-    const quoteURLs = await getQuotesFromQuotesPage(quotesURL, skin);
+    const quoteURLs = await getQuotesFromQuotesPage(quotesURL, ship, skin);
 
     if (typeof quoteURLs == 'string') {
         // Error state
@@ -370,7 +372,7 @@ const getMeAsMember = (guild: Guild): GuildMember => {
 };
 
 // Get all the quotes from the page URL given for the given skin given
-const getQuotesFromQuotesPage = async (pageURL: string, skin: string): Promise<Array<string> | string> => {
+const getQuotesFromQuotesPage = async (pageURL: string, ship: string, skin: string): Promise<Array<string> | string> => {
     const res = await axios.get(`${WIKI_URL_BASE}${pageURL}`, {
         headers: {
             'User-Agent': USER_AGENT
@@ -388,7 +390,7 @@ const getQuotesFromQuotesPage = async (pageURL: string, skin: string): Promise<A
         if (!allQuotesHTML.includes(skinNameHeader)) {
             skinNameHeader = `">${skin} skin</span>`
             if (!allQuotesHTML.includes(skinNameHeader)) {
-                return `*${skin}* is not a valid skin for the given ship.`;
+                return `*${skin}* is not a valid skin for ${ship}.`;
             }
         }
     }
@@ -458,7 +460,12 @@ const getURLForShip = async (ship: string): Promise<string> => {
     });
 
     let shipListHTML: string = res.data;
-    shipListHTML = skipPast(shipListHTML, `title="${ship}"`);
+    // URL is before the displayed text (because it's an anchor tag)
+    // so slightly custom string parsing is needed here
+    const shipNameIndex = shipListHTML.indexOf(`>${ship}</a>`);
+    const shipURLIndex = shipListHTML.lastIndexOf('<a href="/wiki/', shipNameIndex);
+
+    shipListHTML = shipListHTML.substring(shipURLIndex, shipNameIndex);
     shipListHTML = skipPast(shipListHTML, '<a href="/wiki/');
 
     const shipURL = extractUntil(shipListHTML, '"');
