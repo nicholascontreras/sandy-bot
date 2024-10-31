@@ -8,6 +8,11 @@ import sharp from 'sharp'
 import { exit } from 'process';
 import { execSync } from 'child_process';
 
+// Print with timestamp
+const log = (msg: string): void => {
+    console.log(`${new Date()}: ${msg}`);
+};
+
 // Fetch an environment variable and quit program if it's not found
 const getEnvVar = (varName: string): string => {
     const val = process.env[varName];
@@ -37,7 +42,7 @@ let curSkin = '';
 let quotePlaying = false;
 
 client.once('ready', () => {
-    console.log('Bot ready');
+    log('Bot ready');
 
     const firstGuild = client.guilds.cache.map(g => g)[0];
     const existingNickname = getMeAsMember(firstGuild).displayName;
@@ -128,16 +133,16 @@ const playQuote = async (quoteIndex: number): Promise<void> => {
         const voiceConnection = getVoiceConnection(curGuild.id);
         if (voiceConnection) {
             voiceConnection.subscribe(quotePlayer);
-            console.log(`Subscribed to voice connection in guild: ${curGuild.id}`);
+            log(`Subscribed to voice connection in guild: ${curGuild.id}`);
         } else {
-            console.log(`No voice connection in guild: ${curGuild.id}`);
+            log(`No voice connection in guild: ${curGuild.id}`);
         }
     }
 
     entersState(quotePlayer, AudioPlayerStatus.Playing, 1000 * 5).then(() => {
-        console.log('Began playing');
+        log('Began playing');
         entersState(quotePlayer, AudioPlayerStatus.Idle, 1000 * 120).then(() => {
-            console.log('Quote ended normally');
+            log('Quote ended normally');
             quotePlayer.stop();
             quotePlaying = false;
         }).catch(err => {
@@ -150,8 +155,8 @@ const playQuote = async (quoteIndex: number): Promise<void> => {
     });
 
     setTimeout(() => {
-        console.log(`Playing: ${quoteIndex}`);
-        console.log(`File: ${quoteFile}`);
+        log(`Playing: ${quoteIndex}`);
+        log(`File: ${quoteFile}`);
         quotePlaying = true;
         quotePlayer.play(resource);
     }, 1000);
@@ -179,7 +184,7 @@ const joinVoiceChannels = () => {
                 });
             } else {
                 // No voice channels
-                console.log(`No voice channel to join in guild: ${curGuild.id}`);
+                log(`No voice channel to join in guild: ${curGuild.id}`);
             }
         }
     }
@@ -287,7 +292,7 @@ const getAllSkins = async () => {
 
 // Transforms the bot into the ship and skin given, plays the intro quote
 const transformBot = async (ship: string, skin: string, setNameAndPicture: boolean = true): Promise<string> => {
-    console.log(`Transform Bot: ${ship} [${skin}] ${setNameAndPicture}`);
+    log(`Transform Bot: ${ship} [${skin}] ${setNameAndPicture}`);
 
     if (!allShips.includes(ship)) {
         return `*${ship}* is not a valid ship name.`;
@@ -338,14 +343,14 @@ const setNameAndPictureTo = async (ship: string): Promise<void> => {
     shipImageURL = skipPast(shipImageURL, 'src="');
     shipImageURL = extractUntil(shipImageURL, '"');
 
-    console.log(`Changing profile image to: ${shipImageURL}`);
+    log(`Changing profile image to: ${shipImageURL}`);
     const resImg = await axios.get(shipImageURL, {
         responseType: 'arraybuffer',
         headers: {
             'User-Agent': USER_AGENT,
         }
     });
-    console.log('Got image data');
+    log('Got image data');
     let shipImage = sharp(resImg.data);
     const shipImageWidth = (await shipImage.metadata()).width;
     shipImage = shipImage.resize(shipImageWidth, shipImageWidth);
@@ -422,7 +427,7 @@ const downloadQuotes = async (ship: string, skin: string, quoteURLs: Array<strin
     }
 
     for (let i = 0; i < quoteURLs.length; i++) {
-        console.log(`Downloading ${quoteURLs[i]} (index offset: ${indexOffset})`);
+        log(`Downloading ${quoteURLs[i]} (index offset: ${indexOffset})`);
 
         const res = await axios.get(quoteURLs[i], {
             responseType: 'arraybuffer',
@@ -439,10 +444,10 @@ const downloadQuotes = async (ship: string, skin: string, quoteURLs: Array<strin
             fs.writeFileSync(temp, res.data);
             execSync(`ffmpeg -hide_banner -loglevel error -y -i "${temp}" -af areverse "${outputFile}"`);
             if (fs.existsSync(outputFile)) {
-                console.log("Audio reverse successful");
+                log("Audio reverse successful");
                 fs.rmSync(temp);
             } else {
-                console.log("Audio reverse failed");
+                log("Audio reverse failed");
                 fs.renameSync(temp, outputFile);
             }
         } else {
@@ -510,15 +515,15 @@ const setupSlashCommands = async () => {
         .toJSON();
 
     await rest.put(Routes.applicationCommands(APPLICATION_ID), { body: [transformCommand, rebootCommand] });
-    console.log('Slash commands updated');
+    log('Slash commands updated');
 };
 
 getAllShips().then(res => {
     allShips = res;
-    console.log(`Loaded all ships: ${allShips.length}`);
+    log(`Loaded all ships: ${allShips.length}`);
     getAllSkins().then(res => {
         allSkins = res;
-        console.log(`Loaded all skins: ${allSkins.length}`);
+        log(`Loaded all skins: ${allSkins.length}`);
         setupSlashCommands().then(() => {
             client.login(DISCORD_TOKEN);
         });
