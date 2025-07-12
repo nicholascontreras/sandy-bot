@@ -41,14 +41,15 @@ let curSkin = '';
 
 let quotePlaying = false;
 
-client.once('ready', () => {
+client.once('ready', async () => {
     log('Bot ready');
 
     const firstGuild = client.guilds.cache.map(g => g)[0];
     const existingNickname = getMeAsMember(firstGuild).displayName;
 
     if (allShips.includes(existingNickname)) {
-        transformBot(existingNickname, 'Default', false);
+        const result = await transformBot(existingNickname, 'Default', false);
+        log(result);
     }
 
     setTimeout(playRandomQuotes, 100);
@@ -83,6 +84,7 @@ client.on('interactionCreate', async (interaction) => {
     if (interaction.commandName === 'transform') {
         await interaction.deferReply({ ephemeral: true });
         const result = await transformBot(interaction.options.getString('ship', true), interaction.options.getString('skin') || 'Default');
+        log(result);
         await interaction.editReply(result);
     } else if (interaction.commandName === 'reboot') {
         await interaction.reply({ content: 'Rebooting...', ephemeral: true });
@@ -256,7 +258,7 @@ const getAllSkins = async () => {
 
     let allSkins = [];
 
-    while (skinCategoriesHTML.includes('class="skins-category"')) {
+    while (skinCategoriesHTML.includes('class="skin-navdisplay"')) {
         // Parse a skin category into the url for the page listing all the skins in this category
         skinCategoriesHTML = skipPast(skinCategoriesHTML, '<img');
         skinCategoriesHTML = skipPast(skinCategoriesHTML, '<a href="/wiki/');
@@ -389,11 +391,11 @@ const getQuotesFromQuotesPage = async (pageURL: string, ship: string, skin: stri
     allQuotesHTML = extractUntil(allQuotesHTML, '</article>');
 
     // Jump to the header for the given skin
-    let skinNameHeader = `">${skin}</span>`;
+    let skinNameHeader = `">${skin}</h3>`;
     if (!allQuotesHTML.includes(skinNameHeader)) {
-        skinNameHeader = `">${skin} Skin</span>`
+        skinNameHeader = `">${skin} Skin</h3>`
         if (!allQuotesHTML.includes(skinNameHeader)) {
-            skinNameHeader = `">${skin} skin</span>`
+            skinNameHeader = `">${skin} skin</h3>`
             if (!allQuotesHTML.includes(skinNameHeader)) {
                 return `*${skin}* is not a valid skin for ${ship}.`;
             }
