@@ -4,4 +4,4 @@ services:
     container_name: sandy-bot
     env_file:
       - .env
-    restart: always
+    restart: unless-stopped

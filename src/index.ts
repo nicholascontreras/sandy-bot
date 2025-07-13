@@ -24,7 +24,7 @@ const getEnvVar = (varName: string): string => {
     }
 };
 
-const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36';
+const USER_AGENT = 'Dalvik/2.1.0 (Linux; U; Android 14; SM-X306B Build/UP1A.231005.007)';
 
 const WIKI_URL_BASE = 'https://azurlane.koumakan.jp/wiki/';
 const DISCORD_TOKEN = getEnvVar('DISCORD_TOKEN');
