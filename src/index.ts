@@ -148,8 +148,8 @@ const playQuote = async (quoteIndex: number): Promise<void> => {
             quotePlayer.stop();
             quotePlaying = false;
         }).catch(err => {
-            console.error('Quote failed to end in time', err);
-            exit(98);
+            console.error('Quote failed to end in time');
+            // exit(98);
         });
     }).catch(err => {
         console.error('Failed to start quote in time', err);
