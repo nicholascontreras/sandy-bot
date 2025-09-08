@@ -169,7 +169,7 @@ const joinVoiceChannels = () => {
     for (let i = 0; i < allGuilds.length; i++) {
         const curGuild = allGuilds[i];
         let connection = getVoiceConnection(curGuild.id);
-        if (!connection) {
+        // if (!connection) {
             const voiceChannel = curGuild.channels.cache.filter(channel => channel.type === ChannelType.GuildVoice).at(0);
 
             // Check to make sure the zero-ith voice channel actually exists
@@ -186,7 +186,7 @@ const joinVoiceChannels = () => {
                 // No voice channels
                 log(`No voice channel to join in guild: ${curGuild.id}`);
             }
-        }
+        // }
     }
 };
 
