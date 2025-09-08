@@ -41,7 +41,7 @@ let curSkin = '';
 
 let quotePlaying = false;
 
-client.once('ready', async () => {
+client.once('clientReady', async () => {
     log('Bot ready');
 
     const firstGuild = client.guilds.cache.map(g => g)[0];
