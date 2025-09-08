@@ -148,20 +148,18 @@ const playQuote = async (quoteIndex: number): Promise<void> => {
             quotePlayer.stop();
             quotePlaying = false;
         }).catch(err => {
-            console.error('Quote failed to end in time');
-            // exit(98);
+            console.error('Quote failed to end in time\n', err);
+            exit(98);
         });
     }).catch(err => {
-        console.error('Failed to start quote in time', err);
+        console.error('Failed to start quote in time\n', err);
         exit(99);
     });
 
-    setTimeout(() => {
-        log(`Playing: ${quoteIndex}`);
-        log(`File: ${quoteFile}`);
-        quotePlaying = true;
-        quotePlayer.play(resource);
-    }, 1000);
+    log(`Playing: ${quoteIndex}`);
+    log(`File: ${quoteFile}`);
+    quotePlaying = true;
+    quotePlayer.play(resource);
 };
 
 // Rejoin the topmost voice channel in all guilds we're a part of
